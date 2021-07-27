@@ -246,7 +246,8 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
     }
 
     private async doWork() {
-        if (this.jobQueue.size() === 0) { // no jobs available
+        const sizeRes = await this.jobQueue.size();
+        if (sizeRes === 0) { // no jobs available
             if (this.workersBusy.length === 0) {
                 this.idleResolvers.forEach(resolve => resolve());
             }
@@ -261,7 +262,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
             return;
         }
 
-        const job = this.jobQueue.shift();
+        const job = await this.jobQueue.shift();
 
         if (job === undefined) {
             // skip, there are items in the queue but they are all delayed
@@ -285,7 +286,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
             const lastDomainAccess = this.lastDomainAccesses.get(domain);
             if (lastDomainAccess !== undefined
                 && lastDomainAccess + this.options.sameDomainDelay > Date.now()) {
-                this.jobQueue.push(job, {
+                await this.jobQueue.push(job, {
                     delayUntil: lastDomainAccess + this.options.sameDomainDelay,
                 });
                 this.work();
@@ -337,7 +338,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
                     if (this.options.retryDelay !== 0) {
                         delayUntil = Date.now() + this.options.retryDelay;
                     }
-                    this.jobQueue.push(job, {
+                    await this.jobQueue.push(job, {
                         delayUntil,
                     });
                 } else {
@@ -459,7 +460,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
         }
 
         if (this.monitoringInterval) {
-            this.monitor();
+            await this.monitor();
             clearInterval(this.monitoringInterval);
         }
 
@@ -472,7 +473,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
         debug('Closed');
     }
 
-    private monitor(): void {
+    private async monitor(): Promise<void> {
         if (!this.display) {
             this.display = new Display();
         }
@@ -481,7 +482,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
         const now = Date.now();
         const timeDiff = now - this.startTime;
 
-        const doneTargets = this.allTargetCount - this.jobQueue.size() - this.workersBusy.length;
+        const doneTargets = this.allTargetCount - (await this.jobQueue.size()) - this.workersBusy.length;
         const donePercentage = this.allTargetCount === 0
             ? 1 : (doneTargets / this.allTargetCount);
         const donePercStr = (100 * donePercentage).toFixed(2);

@@ -9,11 +9,11 @@ export default class Queue<T> {
     private list: T[] = [];
     private delayedItems: number = 0;
 
-    public size(): number {
+    public async size(): Promise<number> {
         return this.list.length + this.delayedItems;
     }
 
-    public push(item: T, options: QueueOptions = {}): void {
+    public async push(item: T, options: QueueOptions = {}): Promise<void> {
         if (options && options.delayUntil && options.delayUntil > Date.now()) {
             this.delayedItems += 1;
             setTimeout(
@@ -30,7 +30,7 @@ export default class Queue<T> {
 
     // Care, this function might actually return undefined even though size() returns a value > 0
     // Reason is, that there might be delayedItems (checkout QueueOptions.delayUntil)
-    public shift(): T | undefined {
+    public async shift(): Promise<T | undefined> {
         return this.list.shift();
     }
 
