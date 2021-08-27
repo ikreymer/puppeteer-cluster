@@ -248,7 +248,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
     private async doWork() {
         const sizeRes = await this.jobQueue.size();
         if (sizeRes === 0) { // no jobs available
-            if (this.workersBusy.length === 0) {
+            if (await this.jobQueue.numPending(this.workersBusy.length) === 0) {
                 this.idleResolvers.forEach(resolve => resolve());
             }
             return;
@@ -484,7 +484,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
 
         this.allTargetCount = await this.jobQueue.numSeen();
 
-        const doneTargets = this.allTargetCount - (await this.jobQueue.size()) - this.workersBusy.length;
+        const doneTargets = this.allTargetCount - (await this.jobQueue.size()) - (await this.jobQueue.numPending(this.workersBusy.length));
         const donePercentage = this.allTargetCount === 0
             ? 1 : (doneTargets / this.allTargetCount);
         const donePercStr = (100 * donePercentage).toFixed(2);

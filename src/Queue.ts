@@ -41,4 +41,8 @@ export default class Queue<T> {
         return this.count;
     }
 
+    public async numPending(numLocalBusy: number): Promise<number> {
+        return numLocalBusy;
+    }
+
 }

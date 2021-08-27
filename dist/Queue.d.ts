@@ -9,5 +9,6 @@ export default class Queue<T> {
     push(item: T, options?: QueueOptions): Promise<void>;
     shift(): Promise<T | undefined>;
     numSeen(): Promise<number>;
+    numPending(numLocalBusy: number): Promise<number>;
 }
 export {};
