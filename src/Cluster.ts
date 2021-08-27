@@ -399,7 +399,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
         }
         const job = new Job<JobData, ReturnData>(realData, realFunction, callbacks);
 
-        this.allTargetCount += 1;
+        //this.allTargetCount += 1;
         this.jobQueue.push(job);
         this.emit('queue', realData, realFunction);
         this.work();
@@ -481,6 +481,8 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
 
         const now = Date.now();
         const timeDiff = now - this.startTime;
+
+        this.allTargetCount = await this.jobQueue.numSeen();
 
         const doneTargets = this.allTargetCount - (await this.jobQueue.size()) - this.workersBusy.length;
         const donePercentage = this.allTargetCount === 0

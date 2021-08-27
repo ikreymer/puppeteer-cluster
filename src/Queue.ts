@@ -8,6 +8,7 @@ export default class Queue<T> {
 
     private list: T[] = [];
     private delayedItems: number = 0;
+    private count: number = 0;
 
     public async size(): Promise<number> {
         return this.list.length + this.delayedItems;
@@ -25,6 +26,7 @@ export default class Queue<T> {
             );
         } else {
             this.list.push(item);
+            this.count++;
         }
     }
 
@@ -32,6 +34,11 @@ export default class Queue<T> {
     // Reason is, that there might be delayedItems (checkout QueueOptions.delayUntil)
     public async shift(): Promise<T | undefined> {
         return this.list.shift();
+    }
+
+
+    public async numSeen(): Promise<number> {
+        return this.count;
     }
 
 }
