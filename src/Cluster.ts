@@ -252,8 +252,8 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
                 if (await this.jobQueue.numPending(this.workersBusy.length) === 0) {
                     this.idleResolvers.forEach(resolve => resolve());
                 }
-                return;
             }
+            return;
         }
 
         if (this.workersAvail.length === 0) { // no workers available
