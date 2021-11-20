@@ -305,9 +305,17 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
         }
 
         const worker = this.workersAvail.shift() as Worker<JobData, ReturnData>;
-        if (!worker) {
-          console.log("avail worker empty!", worker);
-          return;
+
+        if (!worker) { // no workers available
+            if (job) {
+                await this.jobQueue.push(job);
+            }
+
+            if (this.allowedToStartWorker()) {
+                await this.launchWorker();
+                this.work();
+            }
+            return;
         }
 
         this.workersBusy.push(worker);
