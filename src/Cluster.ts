@@ -248,10 +248,12 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
     private async doWork() {
         const sizeRes = await this.jobQueue.size();
         if (sizeRes === 0) { // no jobs available
-            if (await this.jobQueue.numPending(this.workersBusy.length) === 0) {
-                this.idleResolvers.forEach(resolve => resolve());
+            if (this.workersBusy.length === 0) {
+                if (await this.jobQueue.numPending(this.workersBusy.length) === 0) {
+                    this.idleResolvers.forEach(resolve => resolve());
+                }
+                return;
             }
-            return;
         }
 
         if (this.workersAvail.length === 0) { // no workers available
@@ -303,6 +305,11 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
         }
 
         const worker = this.workersAvail.shift() as Worker<JobData, ReturnData>;
+        if (!worker) {
+          console.log("avail worker empty!", worker);
+          return;
+        }
+
         this.workersBusy.push(worker);
 
         if (this.workersAvail.length !== 0 || this.allowedToStartWorker()) {
