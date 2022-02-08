@@ -342,7 +342,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
 
         if (result.type === 'error') {
             if (job.executeCallbacks) {
-                job.executeCallbacks.reject(result.error);
+                await job.executeCallbacks.reject(result.error);
                 this.errorCount += 1;
             } else { // ignore retryLimits in case of executeCallbacks
                 job.addError(result.error);
@@ -361,7 +361,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
                 }
             }
         } else if (result.type === 'success' && job.executeCallbacks) {
-            job.executeCallbacks.resolve(result.data);
+            await job.executeCallbacks.resolve(result.data);
         }
 
         this.waitForOneResolvers.forEach(
