@@ -334,6 +334,10 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
             throw new Error('No task function defined!');
         }
 
+        if (job.executeCallbacks && job.executeCallbacks.start) {
+          await job.executeCallbacks.start();
+        }
+
         const result: WorkResult = await worker.handle(
             (jobFunction as TaskFunction<JobData, ReturnData>),
             job,

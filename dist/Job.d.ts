@@ -4,6 +4,7 @@ export declare type ExecuteReject = (reason?: any) => void;
 export interface ExecuteCallbacks {
     resolve: (value?: any) => void;
     reject: ExecuteReject;
+    start?: () => void;
 }
 export default class Job<JobData, ReturnData> {
     data?: JobData;
